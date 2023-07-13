@@ -1,41 +1,53 @@
 <template>
-  <div>
+  <div class="green-rez">
     <div>
-      <h2 class="is-life">FOOTBALL IS LIFE</h2>
-    </div>
-    <input
-      class="com-mand"
-      v-model="teamname"
-      type="text"
-      placeholder="Search Players"
-      @change="SearchedCommands"
-    />
-  </div>
-
-  <div>
-    <p class="detailed-info">
-      Сlick on the picture to find out more detailed information
-    </p>
-  </div>
-  <div class="player-cards">
-    <div class="player-card" v-for="player in players" :key="player.idPlayer">
       <div>
-        <p>{{ player.strPlayer }}</p>
+        <h2 class="is-life">FOOTBALL IS LIFE</h2>
+        <div>
+          <router-link :to="{ name: 'list' }">
+            <button class="custom-button">List Leagues</button></router-link
+          >
+        </div>
       </div>
-
-      <img
-        v-if="player.strThumb"
-        class="player-img"
-        :src="player.strThumb"
-        :alt="player.strNationality"
+      <input
+        class="com-mand"
+        v-model="teamname"
+        type="text"
+        placeholder="Search Players"
+        @change="SearchedCommands"
       />
-      <img v-else class="player-img" src="../assets/img/no-photo.jpg" alt="" />
+    </div>
+
+    <div>
+      <p class="detailed-info">
+        Сlick on the picture to find out more detailed information
+      </p>
+    </div>
+    <div class="player-cards">
+      <div class="player-card" v-for="player in players" :key="player.idPlayer">
+        <div class="name-player">
+          <p>{{ player.strPlayer }}</p>
+        </div>
+        <router-link
+          :to="{ name: 'infoplayer', params: { id: player.idPlayer } }"
+          ><img
+            v-if="player.strThumb"
+            class="player-img"
+            :src="player.strThumb"
+            :alt="player.strNationality" />
+          <img
+            v-else
+            class="player-img"
+            src="../assets/img/no-photo.jpg"
+            alt=""
+        /></router-link>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import store from "../store";
 
 const teamname = ref("");
@@ -44,12 +56,29 @@ const players = computed(() => {
 });
 
 function SearchedCommands() {
-  store.dispatch("searchTeams", teamname.value);
+  if (teamname.value) {
+    store.dispatch("searchTeams", teamname.value);
+    localStorage.setItem("PlayerValue", teamname.value);
+  } else {
+    store.commit("searchNameTeams", []);
+  }
 }
+
+onMounted(() => {
+  teamname.value = localStorage.getItem("PlayerValue");
+  if (teamname.value) {
+    SearchedCommands();
+  }
+});
 </script>
 
 <style lang="sass" scoped>
 @import '../assets/styles/main'
+
+.green-rez
+  background-color: $greenrez
+  min-height: 100vh
+  min-width: 100vw
 .com-mand
   width: 70%
   display: flex
@@ -94,12 +123,24 @@ function SearchedCommands() {
   max-width: 300px
   margin: 5px
 
-@media (max-width: 1024px)
-  .player-card
+.name-player
+  letter-spacing: 2px
+  font-size: 20px
+  font-weight: bold
 
-@media (max-width: 768px)
-  .player-card
-
-@media (max-width: 480px)
-  .player-card
+.custom-button
+  position: fixed
+  cursor: pointer
+  top: 10px
+  right: 10px
+  z-index: 9999
+  margin: 30px
+  font-size: 18px
+  background-color: $bluelight
+  color: #fff
+  padding: 5px
+  border-radius: 3px
+  border-color: $violet
+  letter-spacing: 2px
+  font-weight: bold
 </style>
